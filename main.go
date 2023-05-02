@@ -40,9 +40,9 @@ func main() {
 			key := <-node1              // Wait for a request on the node1 channel
 			value, ok := cache.Get(key) // Retrieve the value from the cache
 			if ok {
-				fmt.Println("node 1: cache hit for key", key, "value is", value)
+				fmt.Println("\nnode 1: cache hit for key", key, "value", value)
 			} else {
-				fmt.Println("node 1: cache miss for key", key)
+				fmt.Println("\nnode 1: cache miss for key", key)
 			}
 		}
 	}()
@@ -53,31 +53,50 @@ func main() {
 			key := <-node2
 			value, ok := cache.Get(key)
 			if ok {
-				fmt.Println("node 2: cache hit for key", key, "value is", value)
+				fmt.Println("\nnode 2: cache hit for key", key, "value is", value)
 			} else {
-				fmt.Println("node 2: cache miss for key", key)
+				fmt.Println("\nnode 2: cache miss for key", key)
 			}
 		}
 	}()
 
 	// add some data to the cache
-	cache.Put("foo", "bar")
 	cache.Put("hello", "world")
+	cache.Put("country", "kenya")
+	cache.Put("food", "ugali")
+	cache.Put("goodbye", "world")
 
-	// simulate requests to the cache
+	//to simulate requests to the cache:
 	//node1 <- "next"
 	//node2 <- "hello"
 	//node1 <- "hello"
 	//node2 <- "foo"
+
+	//to prompt for user input to the cache:
+
 	for {
 		var key string
 		fmt.Print("Enter a key to retrieve from node 1: ")
 		fmt.Scanln(&key)
 		node1 <- key // Request the key from node 1
 
-		fmt.Print("Enter a key to retrive from node 2: ")
+		if key == "exit" {
+			// Signal node 1 to exit loop and terminate the program
+			node1 <- key
+			break
+		}
+
+		fmt.Print("Enter a key to retrive from node 2:")
 		fmt.Scanln(&key)
 		//request key from node 2
 		node2 <- key
+
+		if key == "exit" {
+			//signal node 2 to end loop and terminate the program
+			node2 <- key
+			break
+		}
+
 	}
+
 }
