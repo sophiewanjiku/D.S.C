@@ -102,7 +102,35 @@ func main() {
 			case "<Enter>":
 				// get the user input from the input box
 				input := inputBox.Text[32:]
+
+				// send the input to the appropriate node
+				if input == "foo" || input == "hello" {
+					node1 <- input
+				} else {
+					node2 <- input
+				}
+
+				// clear the input box
+				inputBox.Text = "Enter a key to retrieve from the cache:"
+
+				termui.Render(title, node1Box, node2Box, inputBox)
 			}
+		case key := <-node1:
+			value, ok := cache.Get(key)
+			if ok {
+				node1Box.Rows = append(node1Box.Rows, fmt.Sprintf("cache hit for key '%s', value is '%s'", key, value))
+			} else {
+				node1Box.Rows = append(node1Box.Rows, fmt.Sprintf("cache miss for key '%s'", key))
+			}
+			termui.Render(node1Box)
+		case key := <-node2:
+			value, ok := cache.Get(key)
+			if ok {
+				node2Box.Rows = append(node2Box.Rows, fmt.Sprintf("cache hit for key '%s', value is '%s'", key, value))
+			} else {
+				node2Box.Rows = append(node2Box.Rows, fmt.Sprintf("cache miss for key '%s'", key))
+			}
+			termui.Render(node2Box)
 		}
 	}
 
