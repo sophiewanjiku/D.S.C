@@ -71,8 +71,13 @@ func main() {
 	//node2 <- "foo"
 	for {
 		var key string
-		fmt.Print("Enter a key to retrieve from the cache: ")
+		fmt.Print("Enter a key to retrieve from node 1: ")
 		fmt.Scanln(&key)
 		node1 <- key // Request the key from node 1
+
+		fmt.Print("Enter a key to retrive from node 2: ")
+		fmt.Scanln(&key)
+		//request key from node 2
+		node2 <- key
 	}
 }
