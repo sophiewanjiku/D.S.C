@@ -1,17 +1,16 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"log"
+	"os"
+	"strings"
 )
 
 // Define a Cache struct to hold key-value pairs
 type Cache struct {
 	cache map[string]string
-}
-
-// create  a new cache instance
-func NewCache() *Cache {
-	return &Cache{cache: make(map[string]string)}
 }
 
 // Get a value from the cache given a key
@@ -25,9 +24,46 @@ func (c *Cache) Put(key string, value string) {
 	c.cache[key] = value
 }
 
+// create new cache instance
+func NewCache(filename string) (*Cache, error) {
+	cache := make(map[string]string)
+
+	//open file
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	//include scanner
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+
+		//parse each line into key and value
+		line := scanner.Text()
+		parts := strings.Split(line, ",")
+		if len(parts) != 2 {
+			return nil, fmt.Errorf("invalid data format in file: %s", line)
+		}
+		//add the key-value pair to the cache
+		cache[parts[0]] = parts[1]
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	return &Cache{cache: cache}, nil
+
+}
+
 func main() {
 	// create a new cache
-	cache := NewCache()
+	cache, err := NewCache("data.txt")
+	if err != nil {
+		log.Fatal(err)
+
+	}
 
 	// simulate a distributed system with two nodes
 	node1 := make(chan string)
@@ -60,11 +96,11 @@ func main() {
 		}
 	}()
 
-	// add some data to the cache
-	cache.Put("hello", "world")
-	cache.Put("country", "kenya")
-	cache.Put("food", "ugali")
-	cache.Put("goodbye", "world")
+	// // add some data to the cache
+	// cache.Put("hello", "world")
+	// cache.Put("country", "kenya")
+	// cache.Put("food", "ugali")
+	// cache.Put("goodbye", "world")
 
 	//to simulate requests to the cache:
 	//node1 <- "next"
